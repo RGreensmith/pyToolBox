@@ -1,5 +1,6 @@
 import numpy as np
-def scaling (data, a = 0, b = 1, columnIndices = 0) :
+import copy
+def scaling (data, a = 0, b = 1, columnIndices = 0, roundTo = False) :
 
     """
     Scales data between a user specified range.
@@ -7,16 +8,23 @@ def scaling (data, a = 0, b = 1, columnIndices = 0) :
     Args:
 
     Returns:
-
-    """
-    dataScaled = data
-    for i in range(len(columnIndices)) :
-        minX = min(data[:, columnIndices[i]])
-        maxX = max(data[:, columnIndices[i]])
-        for j in range(len(data[:,columnIndices])) :
-            div = (data[j, i] - minX)/(maxX-minX)
-            dataScaled[j, i] = ((b-a)*div)+a
-        cor = np.corrcoeff(dataScaled[:, columnIndices[i]], data[:, columnIndices[i]])
-        print('Correlation coefficient between original and scaled data (',+columnIndices[i],') = ',+cor)
     
+    """
+
+    dataScaled = copy.deepcopy(data)
+    for i in range(len(columnIndices)) :
+        minX = min(data.iloc[:, columnIndices[i]])
+        maxX = max(data.iloc[:, columnIndices[i]])
+        for j in range(len(data.iloc[:, columnIndices[i]])):
+            div = (data.iloc[j, i] - minX)/(maxX-minX)
+            dataScaled.iloc[j, i] = ((b[i]-a[i])*div)+a[i]
+            if roundTo != False :
+                dataScaled.iloc[j, i] = round(dataScaled.iloc[j, i], roundTo)
+            print('data.iloc      [', +j, ',', +i, '] = ', +data.iloc[j, i])
+            print('dataScaled.iloc[', +j, ',', +i, '] = ', +dataScaled.iloc[j, i])
+            print(" ")
+        cor = np.corrcoef(dataScaled.iloc[:, columnIndices[i]], data.iloc[:, columnIndices[i]])
+        print('Normalised covariance matrices of scaled vs original data (',+columnIndices[i],') = ')
+        print(cor)
+    return dataScaled
 
